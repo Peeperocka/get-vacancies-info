@@ -26,7 +26,7 @@ def predict_rub_salary(payment_from, payment_to):
     elif payment_to != 0 and payment_to:
         return payment_to*0.8
     else:
-        print('COCK?')
+        print('Error')
         return
 
 
@@ -159,7 +159,6 @@ def get_all_sj_vacancies(language, secretkey):
 
 def get_sj_vacancies_info(secretkey):
     '''main function to work with SuperJob API'''
-    # languageg = ['JavaScript']
 
     vacancies_info = {}
 
@@ -205,5 +204,6 @@ if __name__ == '__main__':
     load_dotenv()
 
     sj_secretkey = os.environ['superjob_secretkey']
+
     get_hh_vacancies_info()
     get_sj_vacancies_info(sj_secretkey)
