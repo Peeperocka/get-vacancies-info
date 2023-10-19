@@ -26,7 +26,7 @@ def predict_rub_salary(payment_from, payment_to):
     elif payment_to != 0 and payment_to:
         return payment_to*0.8
     else:
-        print('Error')
+        print('Error while predicting salary')
         return
 
 
@@ -96,7 +96,7 @@ def get_hh_vacancies_info():
         try:
             vacancies = get_all_hh_vacancies(language)
         except requests.exceptions.HTTPError:
-            print('Error while getting all vacancies, continue.')
+            print('Error while getting all HH vacancies, continue.')
             continue
 
         for vacancy in vacancies:
@@ -171,7 +171,7 @@ def get_sj_vacancies_info(secretkey):
             vacancies = get_all_sj_vacancies(language, secretkey)
 
         except requests.exceptions.HTTPError:
-            print('Error while getting all vacancies, continue.')
+            print('Error while getting all sj vacancies, continue.')
             continue
 
         for vacancy in vacancies:
