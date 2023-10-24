@@ -19,46 +19,60 @@ POPULAR_LANGUAGES = [
 
 def predict_rub_salary(payment_from, payment_to):
     '''predicting salary'''
-    if payment_from != 0 and payment_to != 0:
+    if payment_from and payment_to:
         return (payment_from + payment_to) / 2
-    elif payment_from != 0 and payment_from:
+
+    elif payment_from:
         return payment_from*1.2
-    elif payment_to != 0 and payment_to:
+
+    elif payment_to:
         return payment_to*0.8
+
     else:
-        print('Error while predicting salary')
         return
+
+
+def avoid_dividing_by_zero(summ, count):
+    '''avoids dividing by zero, if count == 0 returns N/D'''
+    if count != 0:
+        return int(summ / count)
+
+    else:
+        return 'N/D'
 
 
 def print_tables(data, site):
     '''gets collected data and prints table with it'''
 
-    table_data = [[
+    table_config = [[
         'Language',
         'Average Salary',
         'Vacancies Found',
         'Vacancies Processed']
     ]
 
-    for key, value in data.items():
-        table_data.append([
-            key,
-            value['average_salary'],
-            value['vacancies_found'],
-            value['vacancies_processed']]
+    for category, data in data.items():
+        table_config.append([
+            category,
+            data['average_salary'],
+            data['vacancies_found'],
+            data['vacancies_processed']]
         )
 
-    table = AsciiTable(table_data)
+    table = AsciiTable(table_config)
     table.title = site
-    print(table.table)
+    return table.table
 
 
 def get_all_hh_vacancies(language):
     '''downloads all available vacancies'''
 
+    page = 0
+    pages = 1
     period = 30
     area_id = 1
     vacancies = []
+
     url = 'https://api.hh.ru/vacancies/'
 
     params = {
@@ -67,11 +81,7 @@ def get_all_hh_vacancies(language):
             'area': area_id,
         }
 
-    response = requests.get(url, params)
-    response.raise_for_status()
-
-    pages = response.json()['pages']
-    for page in range(pages):
+    while page < pages:
         params = {
             'text': f'Программист {language}',
             'period': period,
@@ -81,22 +91,28 @@ def get_all_hh_vacancies(language):
 
         response = requests.get(url, params)
         response.raise_for_status()
-        vacancies += response.json()['items']
-    return vacancies
+        response_data = response.json()
+
+        vacancies += response_data['items']
+        pages = response_data['pages']
+        page += 1
+
+    return vacancies, response_data['found']
 
 
-def get_hh_vacancies_info():
+def sort_hh_jobs_data():
     '''main function to work with HH api'''
-    vacancies_info = {}
+    jobs_data = {}
 
     for language in POPULAR_LANGUAGES:
 
         vacancies_processed = 0
         salaries_summ = 0
+
         try:
-            vacancies = get_all_hh_vacancies(language)
+            vacancies, vacancies_found = get_all_hh_vacancies(language)
+
         except requests.exceptions.HTTPError:
-            print('Error while getting all HH vacancies, continue.')
             continue
 
         for vacancy in vacancies:
@@ -112,13 +128,16 @@ def get_hh_vacancies_info():
                     vacancy['salary']['to']
                 )
 
-        vacancies_info[language] = {
-            'vacancies_found': len(vacancies),
+        jobs_data[language] = {
+            'vacancies_found': vacancies_found,
             'vacancies_processed': vacancies_processed,
-            'average_salary': int(salaries_summ/vacancies_processed)
+            'average_salary': avoid_dividing_by_zero(
+                salaries_summ,
+                vacancies_processed
+            )
             }
 
-    print_tables(vacancies_info, 'HeadHunter')
+    print(print_tables(jobs_data, 'HeadHunter'))
 
 
 def get_all_sj_vacancies(language, secretkey):
@@ -138,7 +157,6 @@ def get_all_sj_vacancies(language, secretkey):
         params = {
             'keyword': f'Программист {language}',
             'town': 'Москва',
-            'catalogues': 48,
             'page': page
         }
 
@@ -147,20 +165,22 @@ def get_all_sj_vacancies(language, secretkey):
             headers=headers,
             params=params
         )
+
         response.raise_for_status()
+        response_data = response.json()
 
-        more_vacancies = response.json()['more']
+        more_vacancies = response_data['more']
 
-        vacancies += response.json()['objects']
+        vacancies += response_data['objects']
         page += 1
 
     return vacancies
 
 
-def get_sj_vacancies_info(secretkey):
+def sort_sj_jobs_data(secretkey):
     '''main function to work with SuperJob API'''
 
-    vacancies_info = {}
+    jobs_data = {}
 
     for language in POPULAR_LANGUAGES:
 
@@ -171,7 +191,6 @@ def get_sj_vacancies_info(secretkey):
             vacancies = get_all_sj_vacancies(language, secretkey)
 
         except requests.exceptions.HTTPError:
-            print('Error while getting all sj vacancies, continue.')
             continue
 
         for vacancy in vacancies:
@@ -184,26 +203,23 @@ def get_sj_vacancies_info(secretkey):
                     vacancy['payment_from'],
                     vacancy['payment_to']
                 )
-        vacancies_info[language] = {
+
+        jobs_data[language] = {
             'vacancies_found': len(vacancies),
             'vacancies_processed': vacancies_processed,
+            'average_salary': avoid_dividing_by_zero(
+                salaries_summ,
+                vacancies_processed
+            )
         }
 
-        if vacancies_processed != 0:
-            average_salary = int(salaries_summ/vacancies_processed)
-
-            vacancies_info[language]['average_salary'] = average_salary
-
-        else:
-            vacancies_info[language]['average_salary'] = 'N/D'
-
-    print_tables(vacancies_info, 'SuperJob')
+    print(print_tables(jobs_data, 'SuperJob'))
 
 
 if __name__ == '__main__':
     load_dotenv()
 
-    sj_secretkey = os.environ['superjob_secretkey']
+    SJ_SECRETKEY = os.environ['superjob_secretkey']
 
-    get_hh_vacancies_info()
-    get_sj_vacancies_info(sj_secretkey)
+    sort_hh_jobs_data()
+    sort_sj_jobs_data(SJ_SECRETKEY)
