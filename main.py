@@ -42,7 +42,7 @@ def avoid_dividing_by_zero(summ, count):
         return 'N/D'
 
 
-def print_tables(data, site):
+def print_tables(vacancies_info, site):
     '''gets collected data and prints table with it'''
 
     table_config = [[
@@ -52,7 +52,7 @@ def print_tables(data, site):
         'Vacancies Processed']
     ]
 
-    for category, data in data.items():
+    for category, data in vacancies_info.items():
         table_config.append([
             category,
             data['average_salary'],
@@ -92,18 +92,18 @@ def get_all_hh_vacancies(language):
 
         response = requests.get(url, params)
         response.raise_for_status()
-        response_data = response.json()
+        about_vacancies = response.json()
 
-        vacancies += response_data['items']
-        pages = response_data['pages']
+        vacancies += about_vacancies['items']
+        pages = about_vacancies['pages']
         page += 1
 
-    return vacancies, response_data['found']
+    return vacancies, about_vacancies['found']
 
 
 def predict_rub_salary_hh():
     '''main function to work with HH api'''
-    jobs_data = {}
+    programming_jobs_hh = {}
 
     for language in POPULAR_LANGUAGES:
 
@@ -129,7 +129,7 @@ def predict_rub_salary_hh():
                     vacancy['salary']['to']
                 )
 
-        jobs_data[language] = {
+        programming_jobs_hh[language] = {
             'vacancies_found': vacancies_found,
             'vacancies_processed': vacancies_processed,
             'average_salary': avoid_dividing_by_zero(
@@ -138,7 +138,7 @@ def predict_rub_salary_hh():
             )
             }
 
-    print(print_tables(jobs_data, 'HeadHunter'))
+    print(print_tables(programming_jobs_hh, 'HeadHunter'))
 
 
 def get_all_sj_vacancies(language, secretkey):
@@ -168,11 +168,11 @@ def get_all_sj_vacancies(language, secretkey):
         )
 
         response.raise_for_status()
-        response_data = response.json()
+        about_vacancies = response.json()
 
-        more_vacancies = response_data['more']
+        more_vacancies = about_vacancies['more']
 
-        vacancies += response_data['objects']
+        vacancies += about_vacancies['objects']
         page += 1
 
     return vacancies
@@ -181,7 +181,7 @@ def get_all_sj_vacancies(language, secretkey):
 def predict_rub_salary_sj(secretkey):
     '''main function to work with SuperJob API'''
 
-    jobs_data = {}
+    programming_jobs_sj = {}
 
     for language in POPULAR_LANGUAGES:
 
@@ -205,7 +205,7 @@ def predict_rub_salary_sj(secretkey):
                     vacancy['payment_to']
                 )
 
-        jobs_data[language] = {
+        programming_jobs_sj[language] = {
             'vacancies_found': len(vacancies),
             'vacancies_processed': vacancies_processed,
             'average_salary': avoid_dividing_by_zero(
@@ -214,7 +214,7 @@ def predict_rub_salary_sj(secretkey):
             )
         }
 
-    print(print_tables(jobs_data, 'SuperJob'))
+    print(print_tables(programming_jobs_sj, 'SuperJob'))
 
 
 if __name__ == '__main__':
