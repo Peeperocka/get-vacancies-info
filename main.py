@@ -47,7 +47,7 @@ def avoid_dividing_by_zero(summ, count):
         return 'N/D'
 
 
-def print_tables(vacancies_info, site):
+def create_table(vacancies_info, site):
     '''gets collected data and prints table with it'''
 
     table_config = [[
@@ -130,11 +130,10 @@ def predict_rub_salary_hh():
             'average_salary': avoid_dividing_by_zero(
                 salaries_summ,
                 vacancies_processed
-            )
+                )
             }
 
-    print(print_tables(programming_jobs_hh, 'HeadHunter'))
-
+    return programming_jobs_hh
 
 def get_all_sj_vacancies(language, secretkey):
     '''downloads all available vacancies'''
@@ -170,7 +169,7 @@ def get_all_sj_vacancies(language, secretkey):
         vacancies += about_vacancies['objects']
         page += 1
 
-    return vacancies
+    return vacancies, about_vacancies['total']
 
 
 def predict_rub_salary_sj(secretkey):
@@ -183,7 +182,7 @@ def predict_rub_salary_sj(secretkey):
         vacancies_processed = 0
         salaries_summ = 0
 
-        vacancies = get_all_sj_vacancies(language, secretkey)
+        vacancies, vacancies_found = get_all_sj_vacancies(language, secretkey)
 
         for vacancy in vacancies:
             if ((vacancy['currency'] == 'rub') and
@@ -197,7 +196,7 @@ def predict_rub_salary_sj(secretkey):
                 )
 
         programming_jobs_sj[language] = {
-            'vacancies_found': len(vacancies),
+            'vacancies_found': vacancies_found,
             'vacancies_processed': vacancies_processed,
             'average_salary': avoid_dividing_by_zero(
                 salaries_summ,
@@ -205,7 +204,7 @@ def predict_rub_salary_sj(secretkey):
             )
         }
 
-    print(print_tables(programming_jobs_sj, 'SuperJob'))
+    return programming_jobs_sj
 
 
 if __name__ == '__main__':
@@ -214,5 +213,8 @@ if __name__ == '__main__':
     sj_secretkey = os.environ['SUPERJOB_SECRETKEY']
 
     with suppress(requests.exceptions.HTTPError):
-        predict_rub_salary_sj(sj_secretkey)
-        # predict_rub_salary_hh()
+        rub_salary_sj = predict_rub_salary_sj(sj_secretkey)
+        # rub_salary_hh = predict_rub_salary_hh()
+
+        print(create_table(rub_salary_sj, 'Superjob'))
+        # print(create_table(predict_rub_salary_hh, 'HeadHunter'))
