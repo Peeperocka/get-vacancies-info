@@ -135,6 +135,7 @@ def predict_rub_salary_hh():
 
     return programming_jobs_hh
 
+
 def get_all_sj_vacancies(language, secretkey):
     '''downloads all available vacancies'''
     vacancies = []
