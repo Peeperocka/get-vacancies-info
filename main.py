@@ -3,6 +3,7 @@ import requests
 
 from dotenv import load_dotenv
 from terminaltables import AsciiTable
+from contextlib import suppress
 
 POPULAR_LANGUAGES = [
     'JavaScript',
@@ -14,6 +15,10 @@ POPULAR_LANGUAGES = [
     'Python',
     'Go',
     '1c'
+]
+
+POPULAR_LANGUAGESs = [
+    'Java',
 ]
 
 
@@ -35,7 +40,7 @@ def predict_rub_salary(payment_from, payment_to):
 def avoid_dividing_by_zero(summ, count):
     '''avoids dividing by zero, if count == 0 returns N/D'''
 
-    if count != 0:
+    if count:
         return int(summ / count)
 
     else:
@@ -76,12 +81,6 @@ def get_all_hh_vacancies(language):
 
     url = 'https://api.hh.ru/vacancies/'
 
-    params = {
-            'text': f'Программист {language}',
-            'period': period,
-            'area': area_id,
-        }
-
     while page < pages:
         params = {
             'text': f'Программист {language}',
@@ -110,11 +109,7 @@ def predict_rub_salary_hh():
         vacancies_processed = 0
         salaries_summ = 0
 
-        try:
-            vacancies, vacancies_found = get_all_hh_vacancies(language)
-
-        except requests.exceptions.HTTPError:
-            continue
+        vacancies, vacancies_found = get_all_hh_vacancies(language)
 
         for vacancy in vacancies:
 
@@ -188,16 +183,12 @@ def predict_rub_salary_sj(secretkey):
         vacancies_processed = 0
         salaries_summ = 0
 
-        try:
-            vacancies = get_all_sj_vacancies(language, secretkey)
-
-        except requests.exceptions.HTTPError:
-            continue
+        vacancies = get_all_sj_vacancies(language, secretkey)
 
         for vacancy in vacancies:
             if ((vacancy['currency'] == 'rub') and
-                    (vacancy['payment_from'] != 0 or
-                     vacancy['payment_to'] != 0)):
+                    (vacancy['payment_from'] or
+                     vacancy['payment_to'])):
 
                 vacancies_processed += 1
                 salaries_summ += predict_rub_salary(
@@ -222,5 +213,6 @@ if __name__ == '__main__':
 
     sj_secretkey = os.environ['SUPERJOB_SECRETKEY']
 
-    predict_rub_salary_hh()
-    predict_rub_salary_sj(sj_secretkey)
+    with suppress(requests.exceptions.HTTPError):
+        predict_rub_salary_sj(sj_secretkey)
+        # predict_rub_salary_hh()
