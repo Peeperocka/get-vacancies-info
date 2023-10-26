@@ -34,6 +34,7 @@ def predict_rub_salary(payment_from, payment_to):
 
 def avoid_dividing_by_zero(summ, count):
     '''avoids dividing by zero, if count == 0 returns N/D'''
+
     if count != 0:
         return int(summ / count)
 
@@ -100,7 +101,7 @@ def get_all_hh_vacancies(language):
     return vacancies, response_data['found']
 
 
-def sort_hh_jobs_data():
+def predict_rub_salary_hh():
     '''main function to work with HH api'''
     jobs_data = {}
 
@@ -177,7 +178,7 @@ def get_all_sj_vacancies(language, secretkey):
     return vacancies
 
 
-def sort_sj_jobs_data(secretkey):
+def predict_rub_salary_sj(secretkey):
     '''main function to work with SuperJob API'''
 
     jobs_data = {}
@@ -221,5 +222,5 @@ if __name__ == '__main__':
 
     SJ_SECRETKEY = os.environ['superjob_secretkey']
 
-    sort_hh_jobs_data()
-    sort_sj_jobs_data(SJ_SECRETKEY)
+    predict_rub_salary_hh()
+    predict_rub_salary_sj(SJ_SECRETKEY)
