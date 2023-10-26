@@ -220,7 +220,7 @@ def predict_rub_salary_sj(secretkey):
 if __name__ == '__main__':
     load_dotenv()
 
-    SJ_SECRETKEY = os.environ['superjob_secretkey']
+    sj_secretkey = os.environ['SUPERJOB_SECRETKEY']
 
     predict_rub_salary_hh()
-    predict_rub_salary_sj(SJ_SECRETKEY)
+    predict_rub_salary_sj(sj_secretkey)

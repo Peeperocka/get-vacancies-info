@@ -17,7 +17,7 @@ pip install -r requirements.txt
 
 Create `.env` file with this variable:
 
-- `superjob_secretkey=your secret key`. You can get it [there](https://api.superjob.ru/).
+- `SUPERJOB_SECRETKEY=your secret key`. You can get it [there](https://api.superjob.ru/).
 
 ## Run
 
