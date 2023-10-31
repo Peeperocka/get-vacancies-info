@@ -17,10 +17,6 @@ POPULAR_LANGUAGES = [
     '1c'
 ]
 
-POPULAR_LANGUAGESs = [
-    'Java',
-]
-
 
 def predict_rub_salary(payment_from, payment_to):
     '''predicting salary'''
@@ -57,12 +53,12 @@ def create_table(vacancies_info, site):
         'Vacancies Processed']
     ]
 
-    for category, data in vacancies_info.items():
+    for language, job_stats_by_language in vacancies_info.items():
         table_config.append([
-            category,
-            data['average_salary'],
-            data['vacancies_found'],
-            data['vacancies_processed']]
+            language,
+            job_stats_by_language['average_salary'],
+            job_stats_by_language['vacancies_found'],
+            job_stats_by_language['vacancies_processed']]
         )
 
     table = AsciiTable(table_config)
@@ -215,7 +211,7 @@ if __name__ == '__main__':
 
     with suppress(requests.exceptions.HTTPError):
         rub_salary_sj = predict_rub_salary_sj(sj_secretkey)
-        # rub_salary_hh = predict_rub_salary_hh()
+        rub_salary_hh = predict_rub_salary_hh()
 
         print(create_table(rub_salary_sj, 'Superjob'))
-        # print(create_table(predict_rub_salary_hh, 'HeadHunter'))
+        print(create_table(predict_rub_salary_hh, 'HeadHunter'))
