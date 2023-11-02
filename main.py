@@ -43,7 +43,7 @@ def avoid_dividing_by_zero(summ, count):
         return 'N/D'
 
 
-def create_table(vacancies_info, site):
+def create_table(rub_salary, site):
     '''gets collected data and prints table with it'''
 
     table_config = [[
@@ -53,7 +53,7 @@ def create_table(vacancies_info, site):
         'Vacancies Processed']
     ]
 
-    for language, job_stats_by_language in vacancies_info.items():
+    for language, job_stats_by_language in rub_salary.items():
         table_config.append([
             language,
             job_stats_by_language['average_salary'],
@@ -214,4 +214,4 @@ if __name__ == '__main__':
         rub_salary_hh = predict_rub_salary_hh()
 
         print(create_table(rub_salary_sj, 'Superjob'))
-        print(create_table(predict_rub_salary_hh, 'HeadHunter'))
+        print(create_table(rub_salary_hh, 'HeadHunter'))
